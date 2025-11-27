@@ -69,3 +69,97 @@
   }
 }
 
+// Topic: compliance.cleared
+// Published by: Compliance Service (after successful fraud/AML scan via POST /v1/check-compliance)
+// Triggers next: Authorization Service subscribes and performs auth/tokenization; if approved, publishes auth.approved to advance to settlement.
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Compliance Cleared Event",
+  "type": "object",
+  "required": ["version", "eventId", "timestamp", "transactionId", "compliant"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "example": "1.0"
+    },
+    "eventId": {
+      "type": "string",
+      "format": "uuid",
+      "example": "123e4567-e89b-12d3-a456-426614174001"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "example": "2025-11-27T12:01:00Z"
+    },
+    "transactionId": {
+      "type": "string",
+      "example": "tx-789"
+    },
+    "compliant": {
+      "type": "boolean",
+      "description": "True if passed checks (false triggers saga failure/compensation)",
+      "example": true
+    },
+    "flags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Any raised flags (e.g., for monitoring)",
+      "example": ["high_velocity"]
+    },
+    "riskScore": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Calculated risk score (threshold-based)",
+      "example": 0.15
+    }
+  }
+}
+
+// Topic: auth.approved
+// Published by: Authorization Service (after successful authorization via POST /v1/authorize)
+// Triggers next: Settlement Service subscribes and starts saga orchestration (deduct/settle); on success, publishes settlement.completed.
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Authorization Approved Event",
+  "type": "object",
+  "required": ["version", "eventId", "timestamp", "transactionId", "approved"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "example": "1.0"
+    },
+    "eventId": {
+      "type": "string",
+      "format": "uuid",
+      "example": "123e4567-e89b-12d3-a456-426614174002"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "example": "2025-11-27T12:02:00Z"
+    },
+    "transactionId": {
+      "type": "string",
+      "example": "tx-789"
+    },
+    "approved": {
+      "type": "boolean",
+      "description": "True if authorized (false triggers compensation in saga)",
+      "example": true
+    },
+    "authCode": {
+      "type": "string",
+      "description": "Code for downstream settlement",
+      "example": "auth-123"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Approval/denial explanation",
+      "example": "sufficient_funds"
+    }
+  }
+}
