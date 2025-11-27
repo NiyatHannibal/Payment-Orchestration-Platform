@@ -163,3 +163,94 @@
     }
   }
 }
+
+
+// Topic: settlement.completed
+// Published by: Settlement Service (after successful saga steps via POST /v1/settle or batch)
+// Triggers next: Reconciliation Service subscribes for audits; Notification Service subscribes for alerts; completes the happy path flow.
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Settlement Completed Event",
+  "type": "object",
+  "required": ["version", "eventId", "timestamp", "transactionId", "status"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "example": "1.0"
+    },
+    "eventId": {
+      "type": "string",
+      "format": "uuid",
+      "example": "123e4567-e89b-12d3-a456-426614174003"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "example": "2025-11-27T12:03:00Z"
+    },
+    "transactionId": {
+      "type": "string",
+      "example": "tx-789"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["success", "failed"],
+      "description": "Settlement outcome (failed triggers saga.failed)",
+      "example": "success"
+    },
+    "settlementId": {
+      "type": "string",
+      "example": "set-456"
+    },
+    "fee": {
+      "type": "number",
+      "example": 1.50
+    },
+    "settlementDetails": {
+      "type": "object",
+      "additionalProperties": true,
+      "description": "Details like batchId for interbank",
+      "example": {"batchId": "batch-789"}
+    }
+  }
+}
+
+// Topic: reconciliation.matched
+// Published by: Reconciliation Service (after audit via POST /v1/reconcile)
+// Triggers next: Typically ends the flow; if discrepant, may publish to Notification for alerts or admin review (optional extension).
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Reconciliation Matched Event",
+  "type": "object",
+  "required": ["version", "eventId", "timestamp", "transactionId", "status"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "example": "1.0"
+    },
+    "eventId": {
+      "type": "string",
+      "format": "uuid",
+      "example": "123e4567-e89b-12d3-a456-426614174004"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "example": "2025-11-27T12:04:00Z"
+    },
+    "transactionId": {
+      "type": "string",
+      "example": "tx-789"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["matched", "discrepant"],
+      "example": "matched"
+    },
+    "discrepancyAmount": {
+      "type": "number",
+      "description": "Discrepancy value (0 if matched)",
+      "example": 0.00
+    }
+  }
+}
