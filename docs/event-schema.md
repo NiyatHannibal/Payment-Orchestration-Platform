@@ -254,3 +254,93 @@
     }
   }
 }
+
+// Topic: notification.sent
+// Published by: Notification Service (after sending alert via POST /v1/notify or subscription)
+// Triggers next: Flow ends; this is the final user-facing event, confirming delivery (e.g., for logging or UI updates).
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Notification Sent Event",
+  "type": "object",
+  "required": ["version", "eventId", "timestamp", "transactionId", "status"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "example": "1.0"
+    },
+    "eventId": {
+      "type": "string",
+      "format": "uuid",
+      "example": "123e4567-e89b-12d3-a456-426614174005"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "example": "2025-11-27T12:05:00Z"
+    },
+    "transactionId": {
+      "type": "string",
+      "example": "tx-789"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["sent", "delivered", "failed"],
+      "example": "sent"
+    },
+    "channel": {
+      "type": "string",
+      "enum": ["email", "sms", "push"],
+      "example": "email"
+    },
+    "recipient": {
+      "type": "string",
+      "example": "user@example.com"
+    }
+  }
+}
+
+
+// Topic: saga.failed
+// Published by: Settlement Service (on saga compensation failure in any step, e.g., auth or settlement)
+// Triggers next: Notification Service subscribes for failure alerts; Reconciliation may log for audits; rolls back the flow via compensations (e.g., reverse auth, refund deduct).
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Saga Failed Event",
+  "type": "object",
+  "required": ["version", "eventId", "timestamp", "transactionId", "reason"],
+  "properties": {
+    "version": {
+      "type": "string",
+      "example": "1.0"
+    },
+    "eventId": {
+      "type": "string",
+      "format": "uuid",
+      "example": "123e4567-e89b-12d3-a456-426614174006"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "example": "2025-11-27T12:06:00Z"
+    },
+    "transactionId": {
+      "type": "string",
+      "example": "tx-789"
+    },
+    "reason": {
+      "type": "string",
+      "description": "Failure cause (e.g., network error, insufficient funds)",
+      "example": "insufficient_funds"
+    },
+    "compensatedSteps": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Reversed steps in compensation",
+      "example": ["reverse_auth", "notify_user"]
+    }
+  }
+}
+
+
