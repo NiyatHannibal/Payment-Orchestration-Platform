@@ -30,10 +30,10 @@ const pgPool = new Pool({
 });
 
 // Kafka setup (commented out for now; enable when integrating Pub/Sub)
- /*
+/*
 const kafka = new Kafka({
-  clientId: 'api-gateway',
-  brokers: [process.env.KAFKA_BROKER],
+ clientId: 'api-gateway',
+ brokers: [process.env.KAFKA_BROKER],
 });
 // Example producer for publishing events
 const producer = kafka.producer();
@@ -57,6 +57,13 @@ app.get('/health', async (req, res) => {
     res.status(503).json({ status: 'unhealthy', error: 'DB connection failed' });
   }
 });
+
+// Import Routes
+const paymentRoutes = require('./routes/paymentRoutes');
+
+// Mount Routes
+app.use('/v1/payments', paymentRoutes);
+
 
 // Proxy routes to downstream microservices (generic routing)
 // Example: Proxy /auth/* to auth-service
