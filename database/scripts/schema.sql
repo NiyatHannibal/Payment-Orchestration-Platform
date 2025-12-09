@@ -5,6 +5,8 @@ CREATE TABLE IF NOT EXISTS users (
     user_id VARCHAR(50) PRIMARY KEY,
     username VARCHAR(100) NOT NULL,
     email VARCHAR(150) UNIQUE NOT NULL,
+    password_hash VARCHAR(255), -- Added for Auth Service
+    role VARCHAR(20) DEFAULT 'user', -- Added for Auth Service
     is_active BOOLEAN DEFAULT TRUE,
     risk_profile VARCHAR(20) DEFAULT 'low', -- low, medium, high
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
